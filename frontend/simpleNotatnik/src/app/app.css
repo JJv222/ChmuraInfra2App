@@ -1,0 +1,202 @@
+/* ========== Root + Theme ========== */
+:root{
+  --bg: #f7f8fb;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #6b7280;
+  --border: rgba(15,23,42,0.08);
+  --accent: #7c3aed;     /* violet */
+  --accent-2: #ef4444;   /* red */
+  --radius: 12px;
+  --shadow: 0 10px 30px rgba(20,20,30,0.06);
+  --ring: 0 0 0 3px rgba(124,58,237,0.18);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system,"Segoe UI", Roboto,"Helvetica Neue", Arial;
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #0b1020;
+    --card: #121731;
+    --text: #e8ecff;
+    --muted: #9aa3b2;
+    --border: rgba(255,255,255,0.08);
+    --shadow: 0 10px 30px rgba(0,0,0,0.45);
+    --ring: 0 0 0 3px rgba(124,58,237,0.35);
+  }
+}
+
+*{ box-sizing: border-box }
+html,body{ height:100% }
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== Header / Nav ========== */
+.app-header{
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: saturate(160%) blur(10px);
+  background: linear-gradient(90deg, rgba(124,58,237,0.08), rgba(239,68,68,0.05));
+  border-bottom: 1px solid var(--border);
+  padding: 12px 18px;
+  display:flex; align-items:center; gap: 14px; justify-content: space-between;
+}
+
+.brand{
+  font-weight: 800; letter-spacing: .2px; font-size: 1.05rem;
+  background: linear-gradient(90deg,#7c3aed,#ef4444);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+.nav-links{ display:flex; gap: 6px; align-items:center }
+.nav-links a{
+  color: var(--text); text-decoration:none; font-weight:600;
+  padding: 8px 12px; border-radius: 10px; border:1px solid transparent;
+  transition: transform .15s ease, background-color .15s ease, border-color .15s ease;
+}
+.nav-links a:hover{ background: rgba(124,58,237,0.10); border-color: var(--border) }
+.nav-links a.active{ background: var(--accent); color: #fff; transform: translateY(-1px) }
+
+/* ========== Layout ========== */
+.app-main{ min-height: calc(100dvh - 60px); }
+.container{ max-width: 1060px; margin: 0 auto; padding: 24px; }
+
+/* ========== Form / Controls ========== */
+.form-row{ display:flex; flex-wrap:wrap; gap: 10px; align-items:center }
+
+.input, input[type="text"], input[type="file"], textarea, select{
+  width: auto; min-width: 220px;
+  padding: 10px 12px; border-radius: 10px; border:1px solid var(--border);
+  background: var(--card); color: var(--text);
+  outline: none; transition: box-shadow .15s ease, border-color .15s ease;
+}
+textarea{ width:100%; min-height: 110px; resize: vertical }
+
+.input:focus, input:focus, textarea:focus, select:focus{
+  border-color: rgba(124,58,237,.4);
+  box-shadow: var(--ring);
+}
+
+/* File drop area */
+.dropzone{
+  display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;
+  padding: 12px 14px; border-radius: 12px; border:1.5px dashed var(--border);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+}
+.dropzone:hover{ border-color: rgba(124,58,237,.45) }
+
+/* Buttons */
+.btn{
+  appearance:none; border:0; cursor:pointer; font-weight:700;
+  padding: 10px 14px; border-radius: 10px;
+  background: var(--accent); color:#fff; box-shadow: 0 6px 16px rgba(124,58,237,.24);
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+.btn:hover{ filter: brightness(.96); transform: translateY(-1px) }
+.btn:active{ transform: translateY(0) }
+.btn.secondary{
+  background: transparent; color: var(--text);
+  border:1px solid var(--border); box-shadow:none;
+}
+.btn.danger{ background: var(--accent-2); box-shadow: 0 6px 16px rgba(239,68,68,.24) }
+
+/* ========== Note List ========== */
+.note-list{
+  list-style:none; padding:0; margin: 18px 0;
+  display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px;
+}
+
+.note{
+  grid-column: span 12;
+  background: var(--card); border:1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 14px; display:flex; gap:14px; align-items:flex-start;
+  animation: fadeIn .24s ease both;
+}
+
+.note__thumb{
+  flex:0 0 auto; width:108px; height:108px; overflow:hidden; border-radius:10px;
+  border:1px solid var(--border);
+  box-shadow: 0 6px 16px rgba(16,24,40,0.10);
+  display:grid; place-items:center; background: #f2f3f8;
+}
+.note__thumb img, .note__thumb video{
+  width:100%; height:100%; object-fit:cover; display:block; border-radius:8px;
+}
+
+.note__body{ flex:1; min-width:0 }
+.note__title{
+  margin:0; font-size:1.06rem; line-height:1.35; color: var(--text);
+  font-weight: 800; letter-spacing: .2px;
+}
+.note__meta{ color: var(--muted); font-size:.85rem; margin-top:6px }
+.note__text{ color: #374151; margin-top:8px; line-height:1.55 }
+@media (prefers-color-scheme: dark){ .note__text{ color:#b9c2d3 } }
+
+.note__actions{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap }
+
+/* Responsive note grid */
+@media (min-width:640px){
+  .note{ grid-column: span 6 }
+}
+@media (min-width:960px){
+  .note{ grid-column: span 4 }
+}
+
+/* ========== Media Gallery (for /media route) ========== */
+.media-grid{
+  display:grid; gap:12px;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+}
+@media (min-width:640px){ .media-grid{ grid-template-columns: repeat(3, 1fr) } }
+@media (min-width:960px){ .media-grid{ grid-template-columns: repeat(4, 1fr) } }
+
+.media-card{
+  position:relative; overflow:hidden; border-radius: 12px;
+  background: var(--card); border:1px solid var(--border);
+  box-shadow: var(--shadow); isolation:isolate; animation: fadeIn .24s ease both;
+}
+.media-card > img, .media-card > video{
+  width:100%; height: 180px; object-fit: cover; display:block;
+}
+.media-card__bar{
+  position:absolute; inset:auto 8px 8px 8px;
+  background: color-mix(in srgb, #000 40%, transparent);
+  color:#fff; padding:6px 8px; border-radius:8px; font-size:.85rem;
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+}
+
+/* ========== Modal (preview) ========== */
+.modal-backdrop{
+  position:fixed; inset:0; background: rgba(6,11,25,.6);
+  display:none; place-items:center; z-index:100;
+}
+.modal-backdrop.open{ display:grid; animation: fadeIn .18s ease both }
+.modal{
+  width:min(920px, 92vw); max-height: 86vh; overflow:auto;
+  background: var(--card); color: var(--text);
+  border:1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow);
+  padding:16px;
+}
+.modal header{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:0; background:none; border:0 }
+.modal img, .modal video{ width:100%; height:auto; border-radius:12px; margin-top:12px }
+
+/* ========== Tags / Chips ========== */
+.tag{
+  display:inline-flex; align-items:center; gap:6px;
+  padding: 4px 10px; border-radius: 999px; font-weight:600; font-size:.78rem;
+  background: rgba(124,58,237,.1); color: #5b2bd4; border:1px solid var(--border);
+}
+.tag.red{ background: rgba(239,68,68,.1); color:#e23a3a }
+
+/* ========== Utilities ========== */
+.hidden{ display:none !important }
+.center{ display:grid; place-items:center }
+.mt-1{ margin-top:6px } .mt-2{ margin-top:10px } .mt-3{ margin-top:16px }
+.round{ border-radius: 999px }
+
+/* ========== Animations & Motion Pref ========== */
+@keyframes fadeIn{ from{opacity:0; transform: translateY(6px)} to{opacity:1; transform:none} }
+@media (prefers-reduced-motion: reduce){
+  .nav-links a, .btn, .note, .media-card{ transition:none !important; animation:none !important }
+}

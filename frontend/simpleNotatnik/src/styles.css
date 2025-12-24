@@ -1,0 +1,309 @@
+/* You can add global styles to this file, and also import other style files */
+/* ===== Modern, glassy UI – works in light & dark (auto) ===== */
+:root{
+  --bg: #0b0f17;
+  --surface: rgba(255,255,255,0.06);
+  --text: #e6e9ef;
+  --muted: #a9b0bb;
+  --primary: #7aa2ff;
+  --primary-strong: #5b86ff;
+  --ring: 0 0 0 8px rgba(122,162,255,0.12);
+  --card-border: rgba(255,255,255,0.12);
+  --success: #36d399;
+  --danger: #ff6b6b;
+  --warning: #fbbf24;
+}
+
+@media (prefers-color-scheme: light){
+  :root{
+    --bg: #f6f7fb;
+    --surface: rgba(255,255,255,0.75);
+    --text: #10131a;
+    --muted: #4b5563;
+    --primary: #3b82f6;
+    --primary-strong: #2563eb;
+    --card-border: rgba(17,24,39,0.08);
+  }
+}
+
+/* Page background with subtle animated gradient */
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(122,162,255,0.20), transparent 60%),
+    radial-gradient(800px 400px at 100% 0%, rgba(59,130,246,0.18), transparent 60%),
+    linear-gradient(180deg, var(--bg), var(--bg));
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Layout primitives ===== */
+.page{
+  min-height: 100dvh;
+  display: grid;
+  place-items: start center;
+  padding: 32px 16px 64px;
+}
+
+.card{
+  width: min(1100px, 100%);
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.20),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  padding: 22px;
+  animation: cardIn .5s ease both;
+}
+
+@keyframes cardIn{
+  from{ opacity: 0; transform: translateY(8px) scale(.98); }
+  to{ opacity: 1; transform: translateY(0) scale(1); }
+}
+
+h2{
+  margin: 0 0 14px;
+  font-size: clamp(20px, 2.6vw, 28px);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* Header bar (optional) */
+.header-bar{
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.header-bar .meta{
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* ===== Form controls ===== */
+.form-row{
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 10px;
+}
+@media (max-width: 900px){
+  .form-row{ grid-template-columns: 1fr 1fr; }
+  .form-row > .btn { grid-column: 1 / -1; }
+}
+@media (max-width: 560px){
+  .form-row{ grid-template-columns: 1fr; }
+}
+
+/* Inputs */
+.input{
+  appearance: none;
+  width: 100%;
+  height: 42px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  color: var(--text);
+  outline: none;
+  transition: box-shadow .15s ease, border-color .15s ease, transform .05s ease;
+  box-sizing: border-box; /* ensure width obeys padding */
+}
+.input::placeholder{ color: var(--muted); }
+.input:focus{
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+}
+/* grow helper (you already use it) */
+.input--grow{ flex: 1 1 auto; }
+
+/* File input better look */
+input[type="file"].input{
+  padding: 8px 10px;
+  height: 42px;
+  background: transparent;
+}
+
+/* Textareas if you have them */
+textarea.input{ height: 110px; resize: vertical; }
+
+/* Buttons */
+.btn{
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: .2px;
+  background: linear-gradient(180deg, var(--primary), var(--primary-strong));
+  color: white;
+  box-shadow: 0 8px 20px rgba(59,130,246,.30);
+  transition: transform .06s ease, filter .15s ease, box-shadow .15s ease;
+}
+.btn:hover{ filter: brightness(1.05); }
+.btn:active{ transform: translateY(1px); }
+.btn--ghost{
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--card-border);
+  box-shadow: none;
+}
+.btn--danger{
+  background: linear-gradient(180deg, #ff7a7a, #ff5a5a);
+  box-shadow: 0 8px 20px rgba(255,90,90,.28);
+}
+
+/* Tiny icon-y buttons for list actions */
+.icon-btn{
+  height: 36px; min-width: 36px; padding: 0 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; font-size: 13px; border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--card-border);
+  color: var(--text); cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .06s ease;
+}
+.icon-btn:hover{ background: rgba(255,255,255,0.10); }
+.icon-btn:active{ transform: translateY(1px); }
+
+/* ===== Lists (notes/media) ===== */
+.list{
+  display: grid;
+  grid-template-columns: repeat( auto-fill, minmax(280px, 1fr) );
+  gap: 14px;
+  margin-top: 10px;
+}
+.list-item{
+  position: relative;
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+  padding: 14px;
+  overflow: hidden;
+  transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+}
+.list-item:hover{
+  transform: translateY(-2px);
+  border-color: rgba(122,162,255,0.45);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.22);
+}
+.list-item h4{
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.list-item .desc{
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+.list-item .meta{
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Actions row inside card items */
+.item-actions{
+  display: flex; gap: 8px; align-items: center; justify-content: flex-end;
+  margin-top: 10px;
+}
+
+/* Media thumbnails (for Media page) */
+.thumb{
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  overflow: hidden;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: #0b0f17;
+}
+
+/* Empty state */
+.empty{
+  border: 1px dashed var(--card-border);
+  color: var(--muted);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+/* Subtle dividers */
+.hr{
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+  margin: 14px 0;
+}
+
+/* Chips / badges */
+.badge{
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  font-size: 12px; line-height: 1;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.06);
+  color: var(--muted);
+}
+
+/* Subtle scrollbars for desktop */
+*{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(122,162,255,0.45) transparent;
+}
+*::-webkit-scrollbar{ height: 10px; width: 10px; }
+*::-webkit-scrollbar-thumb{
+  background: rgba(122,162,255,0.45);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* =========================================================
+   FIXES: prevent input overlap & make the form responsive
+   (Put this at the very end so it overrides above rules)
+   ========================================================= */
+.form-row{
+  grid-template-columns:
+    minmax(0, 1fr)           /* Title */
+    minmax(0, 1fr)           /* Description */
+    minmax(180px, 260px)     /* File input */
+    auto;                    /* Button */
+  align-items: center;
+}
+.form-row > *{ min-width: 0; } /* allow shrinking inside grid */
+
+input[type="file"].input{
+  width: 100%;
+  max-width: 260px;
+  padding: 6px 10px;
+  height: 42px;
+  background: rgba(255,255,255,0.02);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.form-row .btn{ height: 42px; align-self: center; }
+
+@media (max-width: 900px){
+  .form-row{
+    grid-template-columns: 1fr 1fr;
+  }
+  input[type="file"].input{ max-width: 100%; }
+  .form-row .btn{ grid-column: 1 / -1; justify-self: end; }
+}
+@media (max-width: 560px){
+  .form-row{ grid-template-columns: 1fr; }
+  .form-row .btn{ justify-self: stretch; }
+}
+
+/* Softer rounding so adjacent edges don't visually merge */
+.input{ border-radius: 10px; }
+.btn{ border-radius: 10px; }

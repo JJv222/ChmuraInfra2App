@@ -1,0 +1,48 @@
+<header class="app-header">
+  <div class="brand">Simple Notatnik</div>
+
+  <nav class="nav-links">
+    <a *ngIf="isAuthenticated"
+      routerLink="/notes"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Notes
+    </a>
+
+    <a routerLink="/media" routerLinkActive="active" *ngIf="isAuthenticated">
+      Media
+    </a>
+
+    <div class="spacer"></div>
+
+    <!-- LOGIN / LOGOUT -->
+    <button class="btn" *ngIf="!isAuthenticated" (click)="login()">
+      Login
+    </button>
+
+    <button class="btn btn--secondary" *ngIf="isAuthenticated" (click)="logout()">
+      Logout
+    </button>
+  </nav>
+</header>
+
+<main class="app-main">
+  <div class="container">
+    <router-outlet></router-outlet>
+
+    <!-- DEBUG: stan zalogowania + userData z Cognito -->
+    <div *ngIf="isAuthenticated; else noAuth">
+      <br />
+      Is Authenticated: {{ isAuthenticated }}
+      <br /><br />
+      <br />
+    </div>
+
+    <ng-template #noAuth>
+      <br />
+      <p>Nie jesteś zalogowany.</p>
+      <hr />
+    </ng-template>
+  </div>
+</main>

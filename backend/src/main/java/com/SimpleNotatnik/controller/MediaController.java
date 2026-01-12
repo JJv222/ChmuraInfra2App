@@ -3,8 +3,7 @@ package com.SimpleNotatnik.controller;
 import com.SimpleNotatnik.dto.MediaDto;
 import com.SimpleNotatnik.model.Media;
 import com.SimpleNotatnik.repository.MediaRepository;
-import com.SimpleNotatnik.services.S3Service;
-import com.amazonaws.services.s3.model.S3Object;
+import com.SimpleNotatnik.services.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 public class MediaController {
 
    private final MediaRepository mediaRepository;
-   private final S3Service s3;
+   private final MinioService minioService;
 
    @GetMapping
    public List<MediaDto> getAllMedia() {
@@ -52,28 +51,33 @@ public class MediaController {
          throw new IllegalArgumentException("There is no such Media element in database with id = " + id);
       }
       final Media media = mediaOpt.get();
-      media.setFilename(s3.uploadFile(file, id));
+      String storedFilename = minioService.uploadFile(file, id);
+      media.setFilename(storedFilename);
       media.setContentType(file.getContentType());
       return ResponseEntity.ok(toDto(mediaRepository.save(media)));
    }
 
    @GetMapping("/{id}/download")
    public ResponseEntity<byte[]> downloadMedia(@PathVariable Long id) {
-      return mediaRepository.findById(id)
-         .map(m -> {
-            S3Object picture = s3.downloadFile(m.getFilename(), id);
-            try {
-               return ResponseEntity.ok()
-                  .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + (m.getFilename() == null ? "file" : m.getFilename()) + "\"")
-                  .contentType(MediaType.parseMediaType(picture.getObjectMetadata()
-                     .getContentType())
-                  )
-                  .body(picture.getObjectContent().readAllBytes());
-            } catch (IOException e) {
-               throw new RuntimeException(e);
-            }
-         })
-         .orElse(ResponseEntity.notFound().build());
+      Optional<Media> mediaOpt = mediaRepository.findById(id);
+      if (mediaOpt.isEmpty()) {
+         return ResponseEntity.notFound().build();
+      }
+      Media media = mediaOpt.get();
+      if (media.getFilename() == null) {
+         return ResponseEntity.notFound().build();
+      }
+
+      try {
+         byte[] data = minioService.downloadFile(media.getFilename(), id);
+         String contentType = media.getContentType() != null ? media.getContentType() : "application/octet-stream";
+         return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + media.getFilename() + "\"")
+            .contentType(MediaType.parseMediaType(contentType))
+            .body(data);
+      } catch (IOException e) {
+         return ResponseEntity.status(500).build();
+      }
    }
 
    private MediaDto toDto(Media m) {

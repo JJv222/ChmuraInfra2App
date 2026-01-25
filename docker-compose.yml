@@ -22,7 +22,8 @@ services:
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-superTajneHaslo}
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
     ports:
       - "9000:9000"  # S3 API
       - "9001:9001"  # MinIO Console
@@ -30,6 +31,12 @@ services:
       - minio-data:/data
     networks:
       - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   keycloak:
     image: keycloak/keycloak:26.5
@@ -38,12 +45,20 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
       KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
       KC_HOSTNAME_URL: http://localhost:9081
+      KC_METRICS_ENABLED: "true"
     command: start-dev
     ports:
       - "9081:8080"
+      - "9082:9000" # Management port for metrics docker-compose 
     networks:
       - app-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   backend:
     build:
@@ -75,7 +90,7 @@ services:
       # MinIO - zgodnie z Twoimi properties
       MINIO_URL: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-superTajneHaslo}
       MINIO_BUCKET: ${MINIO_BUCKET:-simplenotatnik}
       MINIO_PREFIX: ${MINIO_PREFIX:-notepad}
       MINIO_SECURE: "false"
@@ -86,6 +101,12 @@ services:
       - app-net
       
     restart: unless-stopped
+    healthcheck:
+        test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+        start_period: 20s
 
   frontend:
     build:
@@ -100,9 +121,72 @@ services:
     networks:
       - app-net
 
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    environment:
+      DATA_SOURCE_URI: "db:5432/postgres?sslmode=disable"
+      DATA_SOURCE_USER: ${DB_USER:-postgres}
+      DATA_SOURCE_PASS: ${DB_PASSWORD:-postgres}
+    networks:
+      - app-net
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+          test: ["CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics"]
+          interval: 10s
+          timeout: 5s
+          retries: 3
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      postgres-exporter:
+        condition: service_healthy
+      backend:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:12.4.0-20977568970
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+          prometheus:
+            condition: service_healthy
+    networks:
+      - app-net
+
 volumes:
   db-data:
   minio-data:
+  prometheus-data:
+  grafana-data:
 
 networks:
   app-net:
